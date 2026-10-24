@@ -44,19 +44,10 @@ workflows:
           sed -i '' "s/CURRENT_PROJECT_VERSION = [^;]*;/CURRENT_PROJECT_VERSION = $BUILD_NUMBER;/g" "$XCODE_PROJECT/project.pbxproj"
 
       - name: Build signed IPA
-        script: |
-          set -o pipefail
-          xcodebuild \
-            -project "$CM_BUILD_DIR/$XCODE_PROJECT" \
-            -scheme "$XCODE_SCHEME" \
-            -archivePath "$CM_BUILD_DIR/build/ios/xcarchive/App.xcarchive" \
-            archive \
-            COMPILER_INDEX_STORE_ENABLE=NO \
-            DEVELOPMENT_TEAM=84DL2K9R98 \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            CODE_SIGN_STYLE=Manual \
-            2>&1 | tee "$CM_BUILD_DIR/xcodebuild-full.log"
-
+  script: |
+    xcode-project build-ipa \
+      --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+      --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
       - build/ios/xcarchive/*.xcarchive
