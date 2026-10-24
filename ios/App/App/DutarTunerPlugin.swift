@@ -8,6 +8,8 @@ public class DutarTunerPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "DutarTunerPlugin"
     public let jsName = "DutarTuner"
     public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "checkPermissions", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "requestPermissions", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "start", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "stop", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "prepareReferencePlayback", returnType: CAPPluginReturnPromise),

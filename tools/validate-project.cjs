@@ -22,6 +22,14 @@ for (const source of [
   assert.equal(result.status, 0, `${source}: ${result.stderr || result.stdout}`);
 }
 
+const tunerPlugin = fs.readFileSync(path.join(root, "ios/App/App/DutarTunerPlugin.swift"), "utf8");
+for (const method of ["checkPermissions", "requestPermissions"]) {
+  assert.ok(
+    tunerPlugin.includes(`CAPPluginMethod(name: "${method}", returnType: CAPPluginReturnPromise)`),
+    `iOS DutarTuner must export ${method} to JavaScript`,
+  );
+}
+
 for (const [catalogPath, assetRoot] of [
   ["www/data/songs-local.json", "www"],
   ["content/songs.json", "content"],
