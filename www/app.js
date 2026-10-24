@@ -5672,11 +5672,13 @@ $$('.language-options button').forEach(function(button){
 $('#allowMic').onclick=async function(){finishOnboarding();await startTuner();};
 $('#denyMic').onclick=function(){finishOnboarding();setTunerStatus('micRequired');};
 async function beginOnboarding(){
-  if(localStorage.getItem('onboardingDone'))return;
+  var needsLanguageSelection=!localStorage.getItem('onboardingDone');
   if(isIOSApp){
     // Do not show the language choices until the native permission dialog closes.
-    $('#languageStep').classList.add('hidden');
-    $('#permissionStep').classList.add('hidden');
+    if(needsLanguageSelection){
+      $('#languageStep').classList.add('hidden');
+      $('#permissionStep').classList.add('hidden');
+    }
     try{
       if(nativeTuner){
         var permission=await nativeTuner.checkPermissions();
@@ -5686,6 +5688,7 @@ async function beginOnboarding(){
       }
     }catch(error){console.error('Microphone permission unavailable',error);}
   }
+  if(!needsLanguageSelection)return;
   $('#languageStep').classList.remove('hidden');
   $('#onboarding').classList.remove('hidden');
 }

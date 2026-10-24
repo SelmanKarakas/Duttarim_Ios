@@ -16,9 +16,9 @@ const server=http.createServer((req,res)=>{
  const context=await browser.newContext({viewport:{width:412,height:915},hasTouch:true,reducedMotion:"reduce"});
  await context.route('https://**',route=>route.abort());
  await context.addInitScript(platform=>{
-   window.nativeMock={permission:'prompt',requests:0,plays:0,frequencies:[]};const m=nativeMock;
+   window.nativeMock={permission:localStorage.getItem('mockMicPermission')||'prompt',requests:0,plays:0,frequencies:[]};const m=nativeMock;
    const original=AudioContext.prototype.createOscillator;AudioContext.prototype.createOscillator=function(){const o=original.call(this);const start=o.start.bind(o);o.start=(...args)=>{m.frequencies.push(o.frequency.value);return start(...args)};return o;};
-   window.Capacitor={getPlatform:()=>platform,Plugins:{DutarTuner:{checkPermissions:async()=>({microphone:m.permission}),requestPermissions:()=>{m.requests++;return new Promise(resolve=>window.answerPermission=value=>{m.permission=value;resolve({microphone:value})})},prepareReferencePlayback:async()=>{m.plays++},setAppearance:async()=>{},setAnalysisMuted:async()=>{},setNoteDetailOrientation:async()=>{},openMicrophoneSettings:async()=>{},start:async()=>{},stop:async()=>{},addListener:async()=>({remove:async()=>{}})},App:{addListener:async()=>({remove:async()=>{}})}}};
+   window.Capacitor={getPlatform:()=>platform,Plugins:{DutarTuner:{checkPermissions:async()=>({microphone:m.permission}),requestPermissions:()=>{m.requests++;return new Promise(resolve=>window.answerPermission=value=>{m.permission=value;localStorage.setItem('mockMicPermission',value);resolve({microphone:value})})},prepareReferencePlayback:async()=>{m.plays++},setAppearance:async()=>{},setAnalysisMuted:async()=>{},setNoteDetailOrientation:async()=>{},openMicrophoneSettings:async()=>{},start:async()=>{},stop:async()=>{},addListener:async()=>({remove:async()=>{}})},App:{addListener:async()=>({remove:async()=>{}})}}};
  },platform);
  const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:'+server.address().port);await page.waitForFunction(()=>window.testApp);
  if(platform==='ios'){
@@ -69,5 +69,14 @@ const server=http.createServer((req,res)=>{
  await page.reload();await page.waitForFunction(()=>window.testApp);assert.equal(await page.evaluate(()=>nativeMock.requests),0);assert.equal(await page.locator('#onboarding').isVisible(),false);
  assert.deepEqual(errors,[]);await context.close();console.log('PASS '+platform+': permission ordering, reference audio, phone/tablet safe-area scrolling, fullscreen controls, selection and touch behavior');
  }
+ const returning=await browser.newContext();
+ await returning.addInitScript(()=>{
+   localStorage.setItem('onboardingDone','1');
+   window.permissionCalls=0;
+   window.Capacitor={getPlatform:()=> 'ios',Plugins:{DutarTuner:{checkPermissions:async()=>({microphone:'prompt'}),requestPermissions:async()=>{window.permissionCalls++;return{microphone:'granted'}},setAppearance:async()=>{},setNoteDetailOrientation:async()=>{}},App:{addListener:async()=>({remove:async()=>{}})}}};
+ });
+ const returningPage=await returning.newPage();await returningPage.goto('http://127.0.0.1:'+server.address().port);await returningPage.waitForFunction(()=>permissionCalls===1);
+ assert.equal(await returningPage.locator('#onboarding').isVisible(),false);
+ await returning.close();console.log('PASS ios: existing onboarding no longer skips a pending system microphone prompt');
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;server.close()});
