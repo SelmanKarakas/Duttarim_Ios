@@ -10,6 +10,7 @@ public class DutarTunerPlugin: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "start", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "stop", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "prepareReferencePlayback", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setAnalysisMuted", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "openMicrophoneSettings", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setNoteDetailOrientation", returnType: CAPPluginReturnPromise),
@@ -64,6 +65,21 @@ public class DutarTunerPlugin: CAPPlugin, CAPBridgedPlugin {
             }
             UIApplication.shared.open(url)
             call.resolve()
+        }
+    }
+
+    @objc func prepareReferencePlayback(_ call: CAPPluginCall) {
+        // Reference tones also work before microphone access or after recording stops.
+        // Keep the measurement session intact while the tuner is listening.
+        do {
+            if !isRunning {
+                let session = AVAudioSession.sharedInstance()
+                try session.setCategory(.playback, mode: .default)
+                try session.setActive(true)
+            }
+            call.resolve()
+        } catch {
+            call.reject("Unable to prepare reference audio: \(error.localizedDescription)")
         }
     }
 
