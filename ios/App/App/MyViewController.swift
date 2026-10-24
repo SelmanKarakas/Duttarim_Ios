@@ -5,7 +5,7 @@ class MyViewController: CAPBridgeViewController {
     private var launchOverlay: UIView?
     private var allowsNoteRotation = false
 
-    override open var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         if allowsNoteRotation {
             return UIDevice.current.userInterfaceIdiom == .pad ? .all : .allButUpsideDown
         }
@@ -38,7 +38,7 @@ class MyViewController: CAPBridgeViewController {
         webView?.backgroundColor = background
     }
 
-    override open func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
 
         let overlay = UIView(frame: view.bounds)
@@ -56,7 +56,7 @@ class MyViewController: CAPBridgeViewController {
         launchOverlay = overlay
     }
 
-    override open func viewDidAppear(_ animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
         guard let overlay = launchOverlay else { return }
@@ -75,7 +75,7 @@ class MyViewController: CAPBridgeViewController {
         }
     }
 
-    override open func capacitorDidLoad() {
+    override func capacitorDidLoad() {
         bridge?.registerPluginInstance(DutarTunerPlugin())
 
         webView?.isOpaque = false
