@@ -3,7 +3,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const root=path.resolve(__dirname,'../www');
 const server=http.createServer((req,res)=>{
  try{const file=path.join(root,req.url.split('?')[0]==='/'?'index.html':req.url.split('?')[0]);let data=fs.readFileSync(file);
- if(file.endsWith('app.js'))data=Buffer.from(data.toString().replace('})();',`window.testApp={showPanel,openSong,applyLanguage,stopReferenceTone,startTuner,stopTuner,get listening(){return listening},set songs(v){songsData=v}};})();`));
+ if(file.endsWith('app.js'))data=Buffer.from(data.toString().replace('})();',`window.testApp={showPanel,openSong,applyLanguage,stopReferenceTone,startTuner,stopTuner,refreshSongsFromRemote,get listening(){return listening},set songs(v){songsData=v}};})();`));
  if(file.endsWith('.css'))data=Buffer.from(data.toString().replaceAll('env(safe-area-inset-top)','var(--test-safe-top,0px)').replaceAll('env(safe-area-inset-bottom)','var(--test-safe-bottom,0px)'));
  res.setHeader('Content-Type',file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':file.endsWith('.png')?'image/png':'text/html');res.end(data);
  }catch{res.statusCode=404;res.end();}
@@ -63,7 +63,7 @@ const server=http.createServer((req,res)=>{
  await page.evaluate(()=>testApp.showPanel('tuner'));assert.equal(await page.locator('#status').evaluate(e=>getComputedStyle(e).userSelect),'none');
  if(process.env.UI_SCREENSHOTS){
    await page.setViewportSize({width:412,height:915});
-   for(const panel of ['tuner','frets','settings']){await page.evaluate(p=>testApp.showPanel(p),panel);await page.screenshot({path:path.join(process.env.UI_SCREENSHOTS,platform+'-'+panel+'-polish.png')});}
+   for(const panel of ['tuner','frets','settings']){await page.evaluate(p=>testApp.showPanel(p),panel);if(panel==='settings')await page.locator('#settingsPanel').evaluate(e=>e.scrollTop=e.scrollHeight);await page.screenshot({path:path.join(process.env.UI_SCREENSHOTS,platform+'-'+panel+'-polish.png')});}
  }
  assert.equal(await page.locator('body').evaluate(e=>getComputedStyle(e).touchAction),'manipulation');
  await page.reload();await page.waitForFunction(()=>window.testApp);assert.equal(await page.evaluate(()=>nativeMock.requests),0);assert.equal(await page.locator('#onboarding').isVisible(),false);
@@ -78,5 +78,17 @@ const server=http.createServer((req,res)=>{
  const returningPage=await returning.newPage();await returningPage.goto('http://127.0.0.1:'+server.address().port);await returningPage.waitForFunction(()=>permissionCalls===1);
  assert.equal(await returningPage.locator('#onboarding').isVisible(),false);
  await returning.close();console.log('PASS ios: existing onboarding no longer skips a pending system microphone prompt');
+ const firstSync=await browser.newContext();
+ const localCatalog=JSON.parse(fs.readFileSync(path.join(root,'data/songs-local.json'),'utf8'));
+ const remoteCatalog=[{...localCatalog[0],id:'first-remote-only'}];
+ await firstSync.route('**/content/songs.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(remoteCatalog)}));
+ const firstSyncPage=await firstSync.newPage();await firstSyncPage.goto('http://127.0.0.1:'+server.address().port);
+ await firstSyncPage.waitForFunction(()=>localStorage.getItem('duttarimKnownSongIdsV1')?.includes('first-remote-only'));
+ assert.equal(await firstSyncPage.locator('#songsToast.visible').count(),0);
+ assert.deepEqual(await firstSyncPage.evaluate(()=>JSON.parse(localStorage.getItem('duttarimNewSongIdsV1')||'[]')),[]);
+ remoteCatalog.push({...localCatalog[0],id:'later-remote-song'});
+ await firstSyncPage.evaluate(()=>testApp.refreshSongsFromRemote());
+ assert.equal(await firstSyncPage.locator('#songsToast.visible').count(),1);
+ await firstSync.close();console.log('PASS: first catalog sync is silent; later additions still notify');
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;server.close()});
