@@ -3,45 +3,66 @@ workflows:
     name: Duttarim iOS TestFlight
     max_build_duration: 120
     instance_type: mac_mini_m2
+
     integrations:
       app_store_connect: Duttarim-Codemagic
+
     environment:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.duttarim.app
+
       vars:
         XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
+
       node: 22
       xcode: 26.4
+
     cache:
       cache_paths:
         - $HOME/.npm
         - $HOME/Library/Caches/org.swift.swiftpm
+
     scripts:
       - name: Install npm dependencies
         script: npm ci
+
       - name: Validate app data and score versions
         script: |
           npm test
           npm run test:versions
+
       - name: Sync Capacitor iOS project
         script: npx cap sync ios
+
       - name: Set up App Store code signing
         script: xcode-project use-profiles
+
       - name: Set unique build number
         script: |
           sed -i '' "s/CURRENT_PROJECT_VERSION = [^;]*;/CURRENT_PROJECT_VERSION = $BUILD_NUMBER;/g" "$XCODE_PROJECT/project.pbxproj"
+
       - name: Build signed IPA
         script: |
-          xcode-project build-ipa \
-            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME"
+          set -o pipefail
+          xcodebuild \
+            -project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -archivePath "$CM_BUILD_DIR/build/ios/xcarchive/App.xcarchive" \
+            archive \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            DEVELOPMENT_TEAM=84DL2K9R98 \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            CODE_SIGN_STYLE=Manual \
+            2>&1 | tee "$CM_BUILD_DIR/xcodebuild-full.log"
+
     artifacts:
       - build/ios/ipa/*.ipa
+      - build/ios/xcarchive/*.xcarchive
+      - xcodebuild-full.log
       - /tmp/xcodebuild_logs/*.log
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+
     publishing:
       app_store_connect:
         auth: integration
