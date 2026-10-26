@@ -105,9 +105,10 @@ public class DutarTunerPlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func setAppearance(_ call: CAPPluginCall) {
         let dark = call.getBool("dark") ?? false
+        let preference = call.getString("preference") ?? "system"
         DispatchQueue.main.async { [weak self] in
             if let controller = self?.bridge?.viewController as? MyViewController {
-                controller.setDarkAppearance(dark)
+                controller.setAppearance(preference, dark: dark)
             }
             call.resolve()
         }

@@ -1,8 +1,8 @@
 /* Shared surfaces and interaction states; loaded after the original layout. */
-:root{--primary-bg:#173b5d;--primary-ink:#fff;--accent-ink:#fff;--accent-bg:#267b79;--focus:#176b89;--surface-soft:#edf4f2;--muted:#526874;--danger:#a6293d;--pattern-opacity:.30}
+:root{--primary-bg:#173b5d;--primary-ink:#fff;--accent-ink:#fff;--accent-bg:#267b79;--focus:#176b89;--surface-soft:#edf4f2;--muted:#526874;--danger:#a6293d;--pattern-opacity:.40}
 :root[data-theme=dark]{--paper:#080c12;--card:#141d28;--surface-soft:#1b2a37;--navy:#e5eff8;--navy2:#b9d4e8;--text:#e5eff8;--muted:#a9bfcd;--line:#344a5a;--mint:#183b3b;--turq:#8ad4ce;--turq2:#9cded8;--good:#8adbb4;--warn:#edbb7e;--primary-bg:#8ad4ce;--primary-ink:#092a2a;--accent-bg:#8ad4ce;--accent-ink:#092a2a;--focus:#a4dbff;--danger:#ffadbb;--shadow:0 10px 28px #0006;--pattern-opacity:.035}
 body::before{opacity:var(--pattern-opacity)}
-:root[data-theme=dark] body::before{background-image:url('etles_desen_dark.png');opacity:.25}
+:root[data-theme=dark] body::before{background-image:url('etles_desen_dark.png');opacity:.31}
 .hidden,[hidden]{display:none!important}
 button,a,select,[role=button]{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 button,[role=button],.privacy-link{transition:background-color .16s,color .16s,box-shadow .16s,filter .12s,scale .12s}

@@ -4,6 +4,7 @@ import Capacitor
 class MyViewController: CAPBridgeViewController {
     private var launchOverlay: UIView?
     private var allowsNoteRotation = false
+    private var appearancePreference = "system"
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         if allowsNoteRotation {
@@ -25,17 +26,29 @@ class MyViewController: CAPBridgeViewController {
         }
     }
 
-    func setDarkAppearance(_ dark: Bool) {
-        let style: UIUserInterfaceStyle = dark ? .dark : .light
+    func setAppearance(_ preference: String, dark: Bool) {
+        appearancePreference = preference
+        let style: UIUserInterfaceStyle = preference == "system" ? .unspecified : (dark ? .dark : .light)
+        overrideUserInterfaceStyle = style
+        view.window?.overrideUserInterfaceStyle = style
+        updateBackground(traitCollection.userInterfaceStyle == .dark)
+    }
+
+    private func updateBackground(_ dark: Bool) {
         let background = UIColor(red: dark ? 8.0 / 255.0 : 247.0 / 255.0,
                                  green: dark ? 12.0 / 255.0 : 248.0 / 255.0,
                                  blue: dark ? 18.0 / 255.0 : 246.0 / 255.0,
                                  alpha: 1.0)
-        overrideUserInterfaceStyle = style
-        view.window?.overrideUserInterfaceStyle = style
         view.window?.backgroundColor = background
         view.backgroundColor = background
         webView?.backgroundColor = background
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if appearancePreference == "system" {
+            updateBackground(traitCollection.userInterfaceStyle == .dark)
+        }
     }
 
     override func viewDidLoad() {
@@ -79,6 +92,6 @@ class MyViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(DutarTunerPlugin())
 
         webView?.isOpaque = false
-        setDarkAppearance(traitCollection.userInterfaceStyle == .dark)
+        setAppearance("system", dark: traitCollection.userInterfaceStyle == .dark)
     }
 }
