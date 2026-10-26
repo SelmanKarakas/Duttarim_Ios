@@ -5614,7 +5614,7 @@ async function playCompletionFeedback(completedIndex,allComplete){
         hz,
         now+(index*.18),
         index===2 ? .55 : .3,
-        index===2 ? .14 : .11
+        index===2 ? .21 : .165
       );
     });
   }else{
@@ -5623,9 +5623,9 @@ async function playCompletionFeedback(completedIndex,allComplete){
       calibratedHz(targets[completedIndex].hz)*2,
       now,
       .42,
-      .12
+      .18
     );
-    createPluck(completionAudioCtx,calibratedHz(targets[completedIndex].hz)*3,now+.12,.3,.08);
+    createPluck(completionAudioCtx,calibratedHz(targets[completedIndex].hz)*3,now+.12,.3,.12);
   }
 }
 
