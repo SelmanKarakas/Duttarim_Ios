@@ -14,8 +14,8 @@ const icon=path.join(root,'artwork/app-icon.png');
       let output;
       if(name.includes('foreground')){
         const size=Math.round(width*70/108),offset=Math.round((width-size)/2);
-        const head=await sharp(path.join(root,'www/dutar-head.png')).resize(size,size).png().toBuffer();
-        output=sharp({create:{width,height,channels:4,background:'#0000'}}).composite([{input:head,left:offset,top:offset}]);
+        const card=await sharp(icon).resize(size,size).png().toBuffer();
+        output=sharp({create:{width,height,channels:4,background:'#0000'}}).composite([{input:card,left:offset,top:offset}]);
       }else{
         const round=name.includes('round'),inset=round?0:Math.round(width/24);
         const svg=round?`<svg width="${width}" height="${height}"><circle cx="${width/2}" cy="${height/2}" r="${width/2}" fill="white"/></svg>`:`<svg width="${width}" height="${height}"><rect x="${inset}" y="${inset}" width="${width-2*inset}" height="${height-2*inset}" rx="${width/5}" fill="white"/></svg>`;
