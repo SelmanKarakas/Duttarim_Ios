@@ -32,8 +32,10 @@ const server=http.createServer((req,res)=>{
       assert.equal(await page.locator('.string-card.completed.active').count(),0);
       assert.equal(await page.locator('.radio-dot').count(),0);
       assert.equal(await page.locator('#tuningCompleteMessage').isVisible(),true);
+      assert.equal(await page.locator('#tuningCompleteMessage').getAttribute('data-stage'),'single');
+      assert.equal(await page.locator('.completion-double').evaluate(e=>getComputedStyle(e).display),'none');
       await page.waitForFunction(()=>confirmationSounds.length===4);
-      assert(parseFloat(await page.locator('.completion-check').evaluate(e=>getComputedStyle(e).strokeDashoffset))>0,'check must be visibly drawing');
+      assert(parseFloat(await page.locator('.completion-single').evaluate(e=>getComputedStyle(e).strokeDashoffset))>0,'check must be visibly drawing');
       await page.waitForFunction(expected=>getComputedStyle(document.querySelector('.string-card.completed')).backgroundColor===expected,theme==='dark'?'rgb(24, 49, 41)':'rgb(237, 247, 240)');
       const surface=await page.locator('.string-card.completed').evaluate(e=>getComputedStyle(e).backgroundColor);
       assert.equal(surface,theme==='dark'?'rgb(24, 49, 41)':'rgb(237, 247, 240)');
@@ -42,7 +44,9 @@ const server=http.createServer((req,res)=>{
       await page.waitForTimeout(1000);
       assert.equal(await page.locator('.tuner-card.all-complete').count(),1);
       assert.equal(await page.locator('#tuningCompleteMessage').isVisible(),true);
-      assert.equal(await page.locator('.completion-check').evaluate(e=>getComputedStyle(e).strokeDashoffset),'0px');
+      assert.equal(await page.locator('#tuningCompleteMessage').getAttribute('data-stage'),'all');
+      assert.equal(await page.locator('.completion-double').evaluate(e=>getComputedStyle(e).display),'block');
+      assert.equal(await page.locator('.completion-double .completion-check').first().evaluate(e=>getComputedStyle(e).strokeDashoffset),'0px');
       assert.equal(await page.evaluate(()=>confirmationSounds.length),10);
       const badge=await page.locator('#tuningCompleteMessage').boundingBox(),note=await page.locator('.pitch-row').boundingBox();
       assert(badge.y+badge.height<=note.y,'confirmation must not cover the note');
