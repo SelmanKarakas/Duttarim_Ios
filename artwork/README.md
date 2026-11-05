@@ -1,5 +1,7 @@
 # Duttarim artwork update
 
+> 2026-11-05: The runtime head and full dutar (`www/dutar-head.png`, `www/TamDuttar.png`) were restored to the original artwork from `d68fe6a`. The prompts below document earlier experiments, not the currently shipped instrument illustrations. Splash and app-icon assets are unchanged by this restoration. See `../RELEASE-V2-TR.md`.
+
 Generated with the built-in image_gen tool from the user's real dutar photograph and existing transparent illustrations. Original canvas dimensions retained: head 1254×1254, full dutar 941×1672. No proportional stretching was applied, to preserve the fret map and string-overlay calibration. Native icon sizes are exported by tools/export-app-icons.cjs.
 
 Assets: `www/dutar-head.png`, `www/TamDuttar.png`, `artwork/app-icon.png`.
