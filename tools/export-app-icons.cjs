@@ -8,7 +8,7 @@ const root=path.resolve(__dirname,'..');
   const size=Math.round(width*(android?(foreground?0.58:0.76):0.84));
   const {data:mark,info}=await sharp(logo).resize(size,size,{fit:'inside'}).png().toBuffer({resolveWithObject:true});
   // Neck axis is x=542 in the 701px-wide trimmed logo.
-  const left=Math.round(width/2-info.width*(542/701));
+  const left=Math.round(width*0.525-info.width*(542/701));
   const top=Math.round((height-info.height)/2);
   return sharp({create:{width,height,channels:4,background:foreground?'#0000':'#F7FAFC'}}).composite([{input:mark,left,top}]);
  }
