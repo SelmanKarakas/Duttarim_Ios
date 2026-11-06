@@ -10,7 +10,7 @@ const art=path.join(root,'artwork/splash-card');
   const android=process.env.ANDROID_ROOT;
   for(const name of ['dutar-head.png','TamDuttar.png'])fs.copyFileSync(path.join(root,'www',name),path.join(android,'www',name));
   const res=path.join(android,'android/app/src/main/res');
-  for(const [theme,dir] of [['light','drawable-nodpi'],['dark','drawable-night-nodpi']]){
+  for(const [theme,dir] of [['light','drawable-nodpi'],['light','drawable-night-nodpi']]){
     fs.mkdirSync(path.join(res,dir),{recursive:true});
     fs.copyFileSync(path.join(art,`splash-${theme}.png`),path.join(res,dir,'branded_splash.png'));
   }

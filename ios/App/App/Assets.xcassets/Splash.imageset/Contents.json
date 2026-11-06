@@ -6,7 +6,7 @@
     },
     {
       "idiom" : "universal",
-      "filename" : "splash-dark.png",
+      "filename" : "splash-light.png",
       "appearances" : [{ "appearance" : "luminosity", "value" : "dark" }]
     }
   ],
