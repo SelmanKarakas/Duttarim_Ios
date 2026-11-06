@@ -5,9 +5,12 @@ const root=path.resolve(__dirname,'..');
 (async()=>{
  const logo=await sharp(path.join(root,'www/dutar-head.png')).trim().png().toBuffer();
  async function render(width,height,foreground=false){
-  const size=Math.round(width*(foreground?0.60:0.78));
-  const mark=await sharp(logo).resize(size,size,{fit:'inside'}).png().toBuffer();
-  return sharp({create:{width,height,channels:4,background:foreground?'#0000':'#F7FAFC'}}).composite([{input:mark,gravity:'centre'}]);
+  const size=Math.round(width*(foreground?0.65:0.84));
+  const {data:mark,info}=await sharp(logo).resize(size,size,{fit:'inside'}).png().toBuffer({resolveWithObject:true});
+  // Neck axis is x=542 in the 701px-wide trimmed logo.
+  const left=Math.round(width/2-info.width*(542/701));
+  const top=Math.round((height-info.height)/2);
+  return sharp({create:{width,height,channels:4,background:foreground?'#0000':'#F7FAFC'}}).composite([{input:mark,left,top}]);
  }
  const master=await render(1024,1024);
  const buffer=await master.removeAlpha().png().toBuffer();
