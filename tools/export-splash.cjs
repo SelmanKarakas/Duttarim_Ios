@@ -6,10 +6,12 @@ const art=path.join(root,'artwork/splash-card');
 (async()=>{
   const ios=path.join(root,'ios/App/App/Assets.xcassets/Splash.imageset');
   for(const theme of ['light','dark'])fs.copyFileSync(path.join(art,`splash-${theme}.png`),path.join(ios,`splash-${theme}.png`));
+  fs.copyFileSync(path.join(art,'splash-background.png'),path.join(root,'ios/App/App/Assets.xcassets/SplashBackground.imageset/splash-background.png'));
   if(!process.env.ANDROID_ROOT)return;
   const android=process.env.ANDROID_ROOT;
   for(const name of ['dutar-head.png','TamDuttar.png'])fs.copyFileSync(path.join(root,'www',name),path.join(android,'www',name));
   const res=path.join(android,'android/app/src/main/res');
+  fs.copyFileSync(path.join(art,'splash-background.png'),path.join(res,'drawable-nodpi/splash_background.png'));
   for(const [theme,dir] of [['light','drawable-nodpi'],['light','drawable-night-nodpi']]){
     fs.mkdirSync(path.join(res,dir),{recursive:true});
     fs.copyFileSync(path.join(art,`splash-${theme}.png`),path.join(res,dir,'branded_splash.png'));
